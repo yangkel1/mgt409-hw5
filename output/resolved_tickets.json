@@ -1,0 +1,302 @@
+{
+  "run_date_shop": "2026-08-31",
+  "model": "gpt-6-luna (Portkey; provider reports deployment gpt-6-luna-global)",
+  "database": "data/campus_customs_new.db (reset from data/campus_customs.db before this run)",
+  "checking_start": 3400.0,
+  "checking_end": 160.0,
+  "tickets": [
+    {
+      "id": 101,
+      "subject": "Bulldog tee",
+      "requester": "Tauhid Zaman",
+      "final_status": "resolved",
+      "outcome": "Size S tee out of stock (0 on hand). The rush reprint already billed on invoice 501 was held because the $840 invoice was 3 days overdue. Accounting queued it, Kelly Yang approved it, and Bulldog Print Co is unblocked (earliest restock 2026-09-05). Customer draft posted, not sent.",
+      "agents": {
+        "boss": "Ticket resolved operationally: the tee is unavailable now, and the existing reprint can proceed once the overdue invoice payment is approved. No customer delivery date is guaranteed.",
+        "inventory": "CC-TEE-WHITE size S cannot be filled now: on-hand is 0 against quantity 1, leaving a shortfall of 1. Bulldog Print Co is the apparel restock source with a 5-day lead and listed arrival date 2026-09-05 if ordered today, but it is blocked by linked open invoice 501; the invoice describes a rush reprint of this exact SKU and size, so paying it releases that shipment rather than requiring a duplicate restock order. Posted one finding to ticket 101; no order or payment request was created.",
+        "accounting": "Invoice 501 is open and 3 days overdue as of 2026-08-31, and it blocks Bulldog Print Co; it was the only open vendor invoice. With checking at $3,400 and no prior pending requests, I queued payment request #1 for $840, leaving $2,560 available after pending requests; a human must approve it, and no money has moved.",
+        "customer_service": "Posted a customer-facing draft explaining that size S is unavailable now and that September 5 is only an earliest expected restock date if approval is completed in time and the shipment is released; no delivery is promised.",
+        "facilities": "Not called (no lease or space issue)."
+      },
+      "human_approvals": [
+        {
+          "payment_request_id": 1,
+          "kind": "invoice",
+          "invoice_id": 501,
+          "payee": "Bulldog Print Co",
+          "amount": 840.0,
+          "approved_by": "Kelly Yang",
+          "payment_id": 1,
+          "checking_before": 3400.0,
+          "checking_after": 2560.0
+        }
+      ],
+      "board_drafts": [
+        3
+      ],
+      "cash_change": -840.0,
+      "runs": [
+        {
+          "run_id": "run-20261012-140345-758f43",
+          "pass": "single pass",
+          "final_status": "resolved",
+          "agents_worked": [
+            "boss",
+            "inventory",
+            "accounting",
+            "customer_service"
+          ],
+          "delegations": [
+            "boss -> inventory",
+            "boss -> accounting",
+            "boss -> customer_service"
+          ],
+          "mcp_tools_by_agent": {
+            "boss": {
+              "get_desk_today": 1,
+              "get_ticket": 1,
+              "get_ticket_board": 1,
+              "update_ticket_status": 1
+            },
+            "inventory": {
+              "get_ticket": 1,
+              "get_ticket_board": 1,
+              "check_stock": 1,
+              "list_vendors": 1,
+              "get_invoice_status": 1,
+              "post_board_note": 1
+            },
+            "accounting": {
+              "get_desk_today": 1,
+              "get_ticket": 1,
+              "get_ticket_board": 1,
+              "get_cash_position": 2,
+              "list_payment_requests": 1,
+              "get_invoice_status": 1,
+              "list_open_invoices": 1,
+              "request_payment": 1,
+              "post_board_note": 1
+            },
+            "customer_service": {
+              "get_ticket": 1,
+              "get_ticket_board": 1,
+              "get_desk_today": 1,
+              "post_board_note": 1
+            }
+          },
+          "usage": {
+            "requests": 19,
+            "tool_calls": 27,
+            "input_tokens": 53273,
+            "output_tokens": 3406,
+            "total_tokens": 56679
+          },
+          "model_reported": [
+            "gpt-6-luna-global"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "subject": "Rent due",
+      "requester": "Elm City Properties",
+      "final_status": "resolved",
+      "outcome": "Rent notice matched lease 1 ($2,400 due 2026-09-02). Accounting queued rent, Kelly Yang approved it, and the lease next_due moved to 2026-10-02. Landlord acknowledgement draft posted, not sent.",
+      "agents": {
+        "boss": "The rent notice matches the lease, and the $2,400 rent is due September 2, 2026. A rent payment request was queued for human approval; no payment has been made.",
+        "facilities": "Ticket 102's rent notice matches lease 1: Elm City Properties is the landlord for the Chapel Street shop, and monthly rent of $2,400 is due September 2, 2026, two days after the shop date of August 31, 2026. Posted a landlord acknowledgement draft on the ticket board only; no landlord was contacted and no payment was queued.",
+        "accounting": "Rent is affordable: queued payment request #2 for $2,400 from checking, pending human approval only. Checking will have $160 available after pending requests; no money has moved. Approval wording: \u201cApprove rent payment request #2 for $2,400 from checking to Elm City Properties.\u201d",
+        "inventory": "Not called (no product involved).",
+        "customer_service": "Not called (landlord is not a customer; Facilities wrote the landlord draft)."
+      },
+      "human_approvals": [
+        {
+          "payment_request_id": 2,
+          "kind": "rent",
+          "lease_id": 1,
+          "payee": "Elm City Properties",
+          "amount": 2400.0,
+          "approved_by": "Kelly Yang",
+          "payment_id": 2,
+          "checking_before": 2560.0,
+          "checking_after": 160.0
+        }
+      ],
+      "board_drafts": [
+        5
+      ],
+      "cash_change": -2400.0,
+      "runs": [
+        {
+          "run_id": "run-20261012-140550-1f8b84",
+          "pass": "single pass",
+          "final_status": "resolved",
+          "agents_worked": [
+            "boss",
+            "facilities",
+            "accounting"
+          ],
+          "delegations": [
+            "boss -> facilities",
+            "boss -> accounting"
+          ],
+          "mcp_tools_by_agent": {
+            "boss": {
+              "get_desk_today": 1,
+              "get_ticket": 1,
+              "get_ticket_board": 2,
+              "get_cash_position": 1,
+              "update_ticket_status": 1
+            },
+            "accounting": {
+              "get_ticket_board": 1,
+              "get_cash_position": 1,
+              "get_lease_and_cash": 1,
+              "get_desk_today": 1,
+              "list_payment_requests": 1,
+              "request_payment": 1,
+              "post_board_note": 1
+            },
+            "facilities": {
+              "get_ticket": 1,
+              "get_ticket_board": 1,
+              "get_lease_and_cash": 1,
+              "get_desk_today": 1,
+              "post_board_note": 1
+            }
+          },
+          "usage": {
+            "requests": 15,
+            "tool_calls": 20,
+            "input_tokens": 41264,
+            "output_tokens": 2145,
+            "total_tokens": 43409
+          },
+          "model_reported": [
+            "gpt-6-luna-global"
+          ]
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "subject": "Bulk hoodie discount",
+      "requester": "Yale AI Club",
+      "final_status": "resolved",
+      "outcome": "Only 8 of 20 size-M hoodies on hand (short 12). Restocking 12 costs $264 but checking had $160, so the first pass escalated. Kelly Yang decided to offer the 8 on hand at 15% off ($49.30 each, $27.30 margin per unit) and defer the restock. The second pass resolved. No PO, no payment.",
+      "agents": {
+        "boss": "Pass 1: The full 20-unit order cannot be confirmed: only 8 are on hand, and the $264 restock exceeds available checking funds of $160. A 15%-off offer for the 8 available units was drafted; no restock PO or payment request was created. Pass 2: Carried out Kelly Yang\u2019s binding decision: offer the 8 size-M hoodies on hand at $49.30 each (15% off), do not order the remaining 12, and do not promise them yet.",
+        "inventory": "There are 8 of the 20 requested CC-HOOD-NAVY size M hoodies on hand, so the order cannot be fulfilled in full now; 12 more are needed. Bulldog Print Co is the matching apparel vendor, has no open invoices and is unblocked; if approved and ordered today, the 5-day lead gives an earliest arrival of 2026-09-05. Restocking 12 at $22 unit cost totals $264; no PO or spending was queued.",
+        "accounting": "Verified $22 unit cost against $58 list price; a suggested 15% discount yields $49.30/unit and $546 total gross margin on 20, with 10% and 20% alternatives still above cost. Only 8 units are on hand; restocking 12 costs $264, while checking has $160 available after pending, so no PO/payment was queued (short by $104). No open invoices or pending requests; no lease is linked, so rent timing was not verifiable. Human decision is needed on discount, and full fulfillment depends on stock/restock funding and the 5-day supply lead time.",
+        "customer_service": "Posted a customer-facing draft offering the approved 15% price for up to the 8 size-M hoodies on hand. The draft says the remaining 12 cannot currently be confirmed, no restock PO has been queued, and the team can revisit after funding and availability are confirmed.",
+        "facilities": "Not called (no lease or space issue)."
+      },
+      "human_approvals": [],
+      "human_decisions": [
+        {
+          "board_note_id": 13,
+          "decided_by": "Kelly Yang",
+          "decision": "Go ahead with the partial offer for the 8 on hand at 15% off; do not order the 12-unit restock ($264 > $160 checking)."
+        }
+      ],
+      "board_drafts": [
+        11
+      ],
+      "cash_change": 0.0,
+      "runs": [
+        {
+          "run_id": "run-20261012-140645-a4602c",
+          "pass": "pass 1 (escalated)",
+          "final_status": "escalated",
+          "agents_worked": [
+            "boss",
+            "inventory",
+            "accounting",
+            "customer_service"
+          ],
+          "delegations": [
+            "boss -> inventory",
+            "boss -> accounting",
+            "accounting -> inventory",
+            "boss -> customer_service"
+          ],
+          "mcp_tools_by_agent": {
+            "boss": {
+              "get_desk_today": 1,
+              "get_ticket": 1,
+              "get_ticket_board": 2,
+              "update_ticket_status": 1
+            },
+            "inventory": {
+              "get_ticket": 2,
+              "get_ticket_board": 2,
+              "get_desk_today": 2,
+              "check_stock": 2,
+              "list_vendors": 2,
+              "post_board_note": 2
+            },
+            "accounting": {
+              "get_ticket": 1,
+              "get_ticket_board": 1,
+              "get_desk_today": 1,
+              "check_stock": 1,
+              "get_cash_position": 1,
+              "quote_margin": 5,
+              "list_open_invoices": 1,
+              "list_payment_requests": 1,
+              "post_board_note": 1
+            },
+            "customer_service": {
+              "get_ticket": 1,
+              "get_ticket_board": 1,
+              "get_desk_today": 1,
+              "check_stock": 1,
+              "quote_margin": 1,
+              "post_board_note": 1
+            }
+          },
+          "usage": {
+            "requests": 22,
+            "tool_calls": 40,
+            "input_tokens": 67768,
+            "output_tokens": 5802,
+            "total_tokens": 73570
+          },
+          "model_reported": [
+            "gpt-6-luna-global"
+          ]
+        },
+        {
+          "run_id": "run-20261012-140913-f6c916",
+          "pass": "pass 2 (after human decision)",
+          "final_status": "resolved",
+          "agents_worked": [
+            "boss"
+          ],
+          "delegations": [],
+          "mcp_tools_by_agent": {
+            "boss": {
+              "get_desk_today": 1,
+              "get_ticket": 1,
+              "get_ticket_board": 1,
+              "update_ticket_status": 1
+            }
+          },
+          "usage": {
+            "requests": 5,
+            "tool_calls": 4,
+            "input_tokens": 13861,
+            "output_tokens": 472,
+            "total_tokens": 14333
+          },
+          "model_reported": [
+            "gpt-6-luna-global"
+          ]
+        }
+      ]
+    }
+  ],
+  "cash_check": "3400.00 - 840.00 - 2400.00 - 0.00 = 160.00; cash_accounts.checking = 160.00",
+  "total_tokens": 187991
+}

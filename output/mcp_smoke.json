@@ -1,0 +1,277 @@
+{
+  "description": "Smoke tests of the campus-customs MCP server, called by the vibe coder (Claude Code 2.1.296) through the project's .mcp.json. Each tool output is cross-checked with a direct SQL query.",
+  "mcp_config": ".mcp.json",
+  "how_run": "claude -p \"<prompt>\" --mcp-config .mcp.json --strict-mcp-config --allowedTools <the 3 tools> --output-format stream-json (run from hw5/)",
+  "current_run": {
+    "when": "after the graded full run (Problem 9); working DB in its finished state: invoice 501 paid, checking $160, lease next_due 2026-10-02",
+    "server": "mcp_server/server.py on standalone FastMCP 4.1",
+    "mcp_connection_status": [
+      {
+        "name": "campus-customs",
+        "status": "connected",
+        "source": "dynamic"
+      }
+    ],
+    "database_unchanged_by_test": "yes (shasum identical before and after)",
+    "all_outputs_match_db": true,
+    "tests": [
+      {
+        "prompt": "Ticket 101 wants 1 Classic Bulldog Tee (CC-TEE-WHITE) in size S. Use the campus-customs MCP tools to check stock and tell me the shortfall.",
+        "tool_name": "check_stock",
+        "mcp_tool_id": "mcp__campus-customs__check_stock",
+        "tool_input": {
+          "sku": "CC-TEE-WHITE",
+          "size": "S",
+          "qty_needed": 1
+        },
+        "tool_output": {
+          "found": true,
+          "sku": "CC-TEE-WHITE",
+          "name": "Classic Bulldog Tee",
+          "size": "S",
+          "qty": 0,
+          "location": "Aisle B",
+          "unit_cost": 8,
+          "list_price": 28,
+          "qty_needed": 1,
+          "shortfall": 1,
+          "can_fill_now": false
+        },
+        "other_tools_attempted_and_denied": [
+          "get_ticket"
+        ],
+        "vibe_coder_answer": "Ticket 101 is short by **1 unit**. There are no size S Classic Bulldog Tees (CC-TEE-WHITE) on hand, so the order can't be filled right now.\n\n| Field | Value |\n|---|---|\n| On hand (size S) | 0 |\n| Needed | 1 |\n| **Shortfall** | **1** |\n| Location | Aisle B |\n| Unit cost / list price | $8 / $28 |\n\nI also tried to pull ticket 101 to confirm its details, but that call is waiting on your permission. The result above uses the SKU, size and quantity you gave me.",
+        "db_verification": {
+          "database": "data/campus_customs_new.db",
+          "query": "SELECT i.qty, i.location, p.unit_cost, p.list_price FROM inventory i JOIN pricing p USING(sku) WHERE sku='CC-TEE-WHITE' AND size='S'",
+          "db_row": {
+            "qty": 0,
+            "location": "Aisle B",
+            "unit_cost": 8.0,
+            "list_price": 28.0
+          },
+          "matches_tool_output": true
+        }
+      },
+      {
+        "prompt": "Ticket 101 is linked to invoice 501. Use the campus-customs MCP tools to check that invoice: is it overdue, and is the vendor blocked from shipping?",
+        "tool_name": "get_invoice_status",
+        "mcp_tool_id": "mcp__campus-customs__get_invoice_status",
+        "tool_input": {
+          "invoice_id": 501
+        },
+        "tool_output": {
+          "found": true,
+          "date_today": "2026-08-31",
+          "id": 501,
+          "vendor_id": 1,
+          "amount": 840,
+          "due_date": "2026-08-28",
+          "status": "paid",
+          "description": "Rush reprint CC-TEE-WHITE S",
+          "vendor_name": "Bulldog Print Co",
+          "vendor_specialty": "apparel reprint",
+          "vendor_lead_days": 5,
+          "days_overdue": 0,
+          "overdue": false,
+          "vendor_open_invoices": 0,
+          "vendor_blocked": false
+        },
+        "other_tools_attempted_and_denied": [
+          "get_ticket"
+        ],
+        "vibe_coder_answer": "Invoice 501 isn't overdue, and the vendor isn't blocked from shipping.\n\n| Field | Value |\n|---|---|\n| Vendor | Bulldog Print Co (apparel reprint, 5-day lead time) |\n| Description | Rush reprint CC-TEE-WHITE S |\n| Amount | $840 |\n| Due date | 2026-08-28 |\n| Status | **paid** |\n| Overdue | **No** (0 days) |\n| Vendor's open invoices | 0 |\n| Vendor blocked | **No** |\n\n- **Not overdue:** the tool only counts an invoice as overdue if it's still open and past its due date. This one is marked paid. The due date (Aug 28) is earlier than the system's date (Aug 31), but that doesn't matter once it's paid.\n- **Vendor can ship:** Bulldog Print Co has no open invoices, so new orders aren't on hold.\n\nThe system's \"today\" is 2026-08-31, not the real date of 2026-10-12. That doesn't change these answers, but other date-based results from these tools will be based on Aug 31.\n\nI tried to open ticket 101 to confirm it links to invoice 501, but the permission prompt for that tool was declined. So I'm relying on your statement that 501 is the right invoice.",
+        "db_verification": {
+          "database": "data/campus_customs_new.db",
+          "query": "SELECT i.amount, i.due_date, i.status, v.name AS vendor_name, v.lead_days AS vendor_lead_days, (SELECT date_today FROM desk) AS date_today FROM invoices i JOIN vendors v ON v.id=i.vendor_id WHERE i.id=501",
+          "db_row": {
+            "amount": 840.0,
+            "due_date": "2026-08-28",
+            "status": "paid",
+            "vendor_name": "Bulldog Print Co",
+            "vendor_lead_days": 5,
+            "date_today": "2026-08-31"
+          },
+          "matches_tool_output": true
+        }
+      },
+      {
+        "prompt": "Ticket 102 is a rent notice for lease 1. Use the campus-customs MCP tools to check the rent, when it is due, and whether checking can cover it.",
+        "tool_name": "get_lease_and_cash",
+        "mcp_tool_id": "mcp__campus-customs__get_lease_and_cash",
+        "tool_input": {
+          "lease_id": 1
+        },
+        "tool_output": {
+          "found": true,
+          "date_today": "2026-08-31",
+          "id": 1,
+          "space_name": "Chapel Street shop",
+          "landlord": "Elm City Properties",
+          "monthly_rent": 2400,
+          "next_due": "2026-10-02",
+          "notes": null,
+          "days_until_due": 32,
+          "cash_accounts": [
+            {
+              "name": "checking",
+              "balance": 160,
+              "date": "2026-08-31",
+              "can_cover_rent": false,
+              "balance_after_rent": -2240
+            }
+          ]
+        },
+        "other_tools_attempted_and_denied": [
+          "get_ticket",
+          "get_cash_position"
+        ],
+        "vibe_coder_answer": "Checking can't cover the rent for lease 1: the balance is $160 and rent is $2,400, so paying it would leave checking at **\u2212$2,240**.\n\n| | |\n|---|---|\n| Space | Chapel Street shop (landlord: Elm City Properties) |\n| Monthly rent | $2,400 |\n| Next due | 2026-10-02 |\n| Days until due | 32, counted from the shop's desk date of 2026-08-31 |\n| Checking balance | $160 as of 2026-08-31 |\n| Can checking cover it? | **No.** It's $2,240 short. |\n\nThe shop's system date (2026-08-31) is about six weeks behind today (2026-10-12). Against the real calendar, the 2026-10-02 due date has already passed, so this rent may be about 10 days overdue. If the shop data is meant to be read as of 2026-08-31, it's 32 days out.\n\nI couldn't run two of the three checks because they weren't approved:\n- **`get_ticket` for #102:** I didn't open the ticket, so I haven't confirmed it links to lease 1 or what the notice says. The figures above come from the lease record.\n- **`get_cash_position`:** I couldn't see pending payment requests on checking. Any pending requests would leave even less than $160, so the answer would still be no.\n\nIf you approve those two tools, I can confirm the ticket details and the cash available after pending requests. I didn't pay anything or change any tickets.",
+        "db_verification": {
+          "database": "data/campus_customs_new.db",
+          "query": "SELECT l.monthly_rent, l.next_due, l.landlord, c.balance, (SELECT date_today FROM desk) AS date_today FROM leases l, cash_accounts c WHERE l.id=1 AND c.name='checking'",
+          "db_row": {
+            "monthly_rent": 2400.0,
+            "next_due": "2026-10-02",
+            "landlord": "Elm City Properties",
+            "balance": 160.0,
+            "date_today": "2026-08-31"
+          },
+          "matches_tool_output": true
+        }
+      }
+    ]
+  },
+  "problem4_original_run": {
+    "when": "Problem 4, before any agent run; working DB identical to the original",
+    "server": "same three tools on FastMCP from mcp 1.x (the server later moved to standalone FastMCP 4 with identical outputs for these tools)",
+    "mcp_connection_status": [
+      {
+        "name": "campus-customs",
+        "status": "connected",
+        "source": "dynamic"
+      }
+    ],
+    "all_outputs_match_db": true,
+    "tests": [
+      {
+        "ticket": "101",
+        "prompt": "Ticket 101 wants 1 Classic Bulldog Tee (CC-TEE-WHITE) in size S. Use the campus-customs MCP tools to check stock and tell me the shortfall.",
+        "tool_name": "check_stock",
+        "mcp_tool_id": "mcp__campus-customs__check_stock",
+        "tool_input": {
+          "sku": "CC-TEE-WHITE",
+          "size": "S",
+          "qty_needed": 1
+        },
+        "tool_output": {
+          "found": true,
+          "sku": "CC-TEE-WHITE",
+          "name": "Classic Bulldog Tee",
+          "size": "S",
+          "qty": 0,
+          "location": "Aisle B",
+          "unit_cost": 8.0,
+          "list_price": 28.0,
+          "qty_needed": 1,
+          "shortfall": 1,
+          "can_fill_now": false
+        },
+        "vibe_coder_answer": "Ticket 101 is short by **1**. The shop has none of this shirt in stock.\n\n`check_stock` result for CC-TEE-WHITE (Classic Bulldog Tee), size S:\n\n| Field | Value |\n|---|---|\n| On hand | 0 (Aisle B) |\n| Needed | 1 |\n| **Shortfall** | **1** |\n| Can fill now | No |\n| Unit cost / list price | $8.00 / $28.00 |\n\nSo the order can't be filled until at least 1 more size S tee is restocked.",
+        "db_verification": {
+          "query": "SELECT i.qty, i.location, p.unit_cost, p.list_price FROM inventory i JOIN pricing p USING(sku) WHERE sku='CC-TEE-WHITE' AND size='S'",
+          "db_row": {
+            "qty": 0,
+            "location": "Aisle B",
+            "unit_cost": 8.0,
+            "list_price": 28.0
+          },
+          "matches_tool_output": true,
+          "database": "data/campus_customs.db (original; identical to the working copy at the time)"
+        }
+      },
+      {
+        "ticket": "101 (gates 103 restock)",
+        "prompt": "Ticket 101 is linked to invoice 501. Use the campus-customs MCP tools to check that invoice: is it overdue, and is the vendor blocked from shipping?",
+        "tool_name": "get_invoice_status",
+        "mcp_tool_id": "mcp__campus-customs__get_invoice_status",
+        "tool_input": {
+          "invoice_id": 501
+        },
+        "tool_output": {
+          "found": true,
+          "date_today": "2026-08-31",
+          "id": 501,
+          "vendor_id": 1,
+          "amount": 840.0,
+          "due_date": "2026-08-28",
+          "status": "open",
+          "description": "Rush reprint CC-TEE-WHITE S",
+          "vendor_name": "Bulldog Print Co",
+          "vendor_specialty": "apparel reprint",
+          "vendor_lead_days": 5,
+          "days_overdue": 3,
+          "overdue": true,
+          "vendor_open_invoices": 1,
+          "vendor_blocked": true
+        },
+        "vibe_coder_answer": "Invoice 501 is overdue, and the vendor is blocked from shipping.\n\n**Invoice 501**\n- **Vendor:** Bulldog Print Co (apparel reprint, 5-day lead time)\n- **Description:** Rush reprint CC-TEE-WHITE S\n- **Amount:** $840.00\n- **Due date:** 2026-08-28. It's still **open**, so it's **3 days overdue**.\n\n**Vendor status:** Bulldog Print Co is **blocked**. The vendor won't ship new product while it has an open invoice, and this is its only one. Until invoice 501 is paid, they won't restock anything. That includes the white S tee reprint that ticket 101 is probably about.\n\nThe 3 days overdue is counted from the system's date, which is 2026-08-31. Today's real date is 2026-10-12, so if you count from today the invoice is about 45 days overdue. Either way it's overdue and the vendor is blocked.",
+        "db_verification": {
+          "query": "SELECT i.amount, i.due_date, i.status, v.name AS vendor_name, v.lead_days AS vendor_lead_days, (SELECT date_today FROM desk) AS date_today FROM invoices i JOIN vendors v ON v.id=i.vendor_id WHERE i.id=501",
+          "db_row": {
+            "amount": 840.0,
+            "due_date": "2026-08-28",
+            "status": "open",
+            "vendor_name": "Bulldog Print Co",
+            "vendor_lead_days": 5,
+            "date_today": "2026-08-31"
+          },
+          "matches_tool_output": true,
+          "database": "data/campus_customs.db (original; identical to the working copy at the time)"
+        }
+      },
+      {
+        "ticket": "102",
+        "prompt": "Ticket 102 is a rent notice for lease 1. Use the campus-customs MCP tools to check the rent, when it is due, and whether checking can cover it.",
+        "tool_name": "get_lease_and_cash",
+        "mcp_tool_id": "mcp__campus-customs__get_lease_and_cash",
+        "tool_input": {
+          "lease_id": 1
+        },
+        "tool_output": {
+          "found": true,
+          "date_today": "2026-08-31",
+          "id": 1,
+          "space_name": "Chapel Street shop",
+          "landlord": "Elm City Properties",
+          "monthly_rent": 2400.0,
+          "next_due": "2026-09-02",
+          "notes": null,
+          "days_until_due": 2,
+          "cash_accounts": [
+            {
+              "name": "checking",
+              "balance": 3400.0,
+              "date": "2026-08-31",
+              "can_cover_rent": true,
+              "balance_after_rent": 1000.0
+            }
+          ]
+        },
+        "vibe_coder_answer": "Checking can cover the rent for lease 1 (Chapel Street shop, landlord Elm City Properties). I got this from `get_lease_and_cash`, which only reads data and doesn't pay anything.\n\n| | |\n|---|---|\n| Monthly rent | $2,400.00 |\n| Next due | 2026-09-02 (2 days out) |\n| Checking balance | $3,400.00 |\n| Can checking cover it? | **Yes**, leaving $1,000.00 |\n\nThere's a date mismatch you should know about. The shop data says today is **2026-08-31**, but the real date is 2026-10-12. If the data is accurate, rent is due in 2 days. If the data is just out of date, the 09-02 payment is already past due (or was paid but not recorded), and the October rent may be due as well.\n\nI also didn't open ticket 102 itself, because none of the campus-customs tools read tickets. These numbers come straight from the lease record. If the notice gives a different amount or date, the notice and the record disagree.",
+        "db_verification": {
+          "query": "SELECT l.monthly_rent, l.next_due, l.landlord, c.balance, (SELECT date_today FROM desk) AS date_today FROM leases l, cash_accounts c WHERE l.id=1 AND c.name='checking'",
+          "db_row": {
+            "monthly_rent": 2400.0,
+            "next_due": "2026-09-02",
+            "landlord": "Elm City Properties",
+            "balance": 3400.0,
+            "date_today": "2026-08-31"
+          },
+          "matches_tool_output": true,
+          "database": "data/campus_customs.db (original; identical to the working copy at the time)"
+        }
+      }
+    ]
+  }
+}

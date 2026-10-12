@@ -1,0 +1,8 @@
+# MCP server (standalone FastMCP) and agent team (PydanticAI + Portkey via the OpenAI SDK)
+fastmcp>=4.1,<5
+pydantic-ai-slim[openai,mcp]>=2.55,<3
+openai>=3.26
+python-dotenv>=1.0
+# Backend API
+fastapi>=0.115
+uvicorn[standard]>=0.30
